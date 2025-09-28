@@ -55,20 +55,20 @@ jobs:
             cp "content/kintsugi zuihitsu.md" "content/index.md"
           fi
 
-      - name: Commit updated content
+      - name: Fetch Quartz Theme
+        run: curl -s -S https://raw.githubusercontent.com/saberzero1/quartz-themes/master/action.sh | bash -s -- $THEME_NAME
+
+      - name: Commit updated content and theme
         run: |
           git config --global user.name "Automated Sync"
           git config --global user.email "actions@github.com"
           git add content/
           if git diff --staged --quiet; then
-            echo "No content changes detected"
+            echo "No content or theme changes detected"
             exit 0
           fi
-          git commit -m "Auto-sync notes from kintsugi-zuihitsu $(date)"
+          git commit -m "Auto-sync notes from kintsugi-zuihitsu and update theme $(date)"
           git push
-
-      - name: Fetch Quartz Theme
-        run: curl -s -S https://raw.githubusercontent.com/saberzero1/quartz-themes/master/action.sh | bash -s -- $THEME_NAME
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
