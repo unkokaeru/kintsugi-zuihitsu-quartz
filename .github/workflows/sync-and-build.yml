@@ -1,0 +1,101 @@
+name: Sync Notes and Build Site
+
+on:
+  workflow_dispatch:  # Manual trigger
+  repository_dispatch:
+    types: [notes-updated]  # Will be triggered by notes repo
+  schedule:
+    - cron: '*/30 * * * *'  # Check every 30 minutes as backup
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}/quartz
+
+jobs:
+  sync-and-build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+
+    steps:
+      - name: Checkout Quartz repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Remove old content
+        run: |
+          rm -rf content
+          mkdir -p content
+
+      - name: Clone notes from kintsugi-zuihitsu
+        run: |
+          git clone https://github.com/${{ github.repository_owner }}/kintsugi-zuihitsu.git temp-notes
+
+      - name: Copy notes (excluding Obsidian files)
+        run: |
+          cd temp-notes
+          # Copy everything except .obsidian, .git, and other meta files
+          find . -type f -name "*.md" | while read file; do
+            mkdir -p "../content/$(dirname "$file")"
+            cp "$file" "../content/$file"
+          done
+          # Copy attachments/assets
+          if [ -d "attached" ]; then
+            cp -r attached ../content/
+          fi
+          cd ..
+          rm -rf temp-notes
+
+      - name: Symlink or copy homepage to index.md
+        run: |
+          if [ -f "content/kintsugi zuihitsu.md" ]; then
+            cp "content/kintsugi zuihitsu.md" "content/index.md"
+          fi
+
+      - name: Commit updated content
+        run: |
+          git config --global user.name "Automated Sync"
+          git config --global user.email "actions@github.com"
+          git add content/
+          if git diff --staged --quiet; then
+            echo "No content changes detected"
+            exit 0
+          fi
+          git commit -m "Auto-sync notes from kintsugi-zuihitsu $(date)"
+          git push
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Trigger Render Deploy
+        if: github.ref == 'refs/heads/main'
+        run: |
+          curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
