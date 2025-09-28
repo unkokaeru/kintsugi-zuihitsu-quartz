@@ -9,3 +9,94 @@ article a {
   text-transform: uppercase;
   font-size: 0.8em;
 }
+
+// Custom styling for quote callouts
+.callout[data-callout="quote"] {
+  background: transparent;
+  border: none;
+  padding: 2rem 1rem;
+  text-align: center;
+  position: relative;
+
+  // Quote icon at the top
+  .callout-title {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 0 1.5rem 0;
+    gap: 1rem;
+    
+    .callout-icon {
+      --icon-size: 48px;
+      width: var(--icon-size);
+      height: var(--icon-size);
+      background-color: var(--dark);
+      margin: 0;
+      opacity: 0.7;
+      order: -1; // Put icon first
+    }
+    
+    // Author name styling
+    .callout-title-inner {
+      order: 2; // Put author after quote content
+      font-size: 0.95em;
+      font-weight: 500;
+      color: var(--gray);
+      font-style: normal;
+      
+      p {
+        margin: 0;
+        color: var(--gray);
+        font-size: inherit;
+        font-weight: inherit;
+      }
+    }
+    
+    // Hide fold icon for quotes
+    .fold-callout-icon {
+      display: none;
+    }
+  }
+
+  .callout-content {
+    order: 1; // Put quote content between icon and author
+    
+    // Quote text styling
+    p {
+      font-size: 1.5em;
+      line-height: 1.4;
+      font-style: italic;
+      margin: 0 0 1.5rem 0;
+      color: var(--dark);
+      font-weight: 400;
+    }
+    
+    // Remove margin from last paragraph
+    p:last-child {
+      margin-bottom: 0;
+    }
+  }
+  
+  // Reorder elements: icon, quote content, then author
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  
+  .callout-title {
+    display: contents; // Break out of normal flow
+  }
+  
+  .callout-title .callout-icon {
+    order: -2;
+    margin-bottom: 1.5rem;
+  }
+  
+  .callout-content {
+    order: -1;
+  }
+  
+  .callout-title .callout-title-inner {
+    order: 0;
+    margin-top: 1rem;
+  }
+}
