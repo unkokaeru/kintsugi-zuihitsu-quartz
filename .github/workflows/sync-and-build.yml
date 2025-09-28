@@ -48,6 +48,12 @@ jobs:
           cd ..
           rm -rf temp-notes
 
+      - name: Symlink or copy homepage to index.md
+        run: |
+          if [ -f "content/kintsugi zuihitsu.md" ]; then
+            cp "content/kintsugi zuihitsu.md" "content/index.md"
+          fi
+
       - name: Commit updated content
         run: |
           git config --global user.name "Automated Sync"
