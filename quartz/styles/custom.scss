@@ -3,7 +3,7 @@
 @use "sass:map";
 @use "sass:meta";
 @use "sass:string";
-@use "../variables.scss" as *;
+@use "variables.scss" as *;
 
 :root[saved-theme="dark"],
 html[saved-theme="dark"] {
