@@ -100,3 +100,14 @@ article a {
     margin-top: 1rem;
   }
 }
+
+// Make headers (content headings) centered
+h1 {
+  padding-left: 33px;
+  text-align: center;
+}
+
+.article-title {
+  padding-left: 0px;
+  text-align: left;
+}
