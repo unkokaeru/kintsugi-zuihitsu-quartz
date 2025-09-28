@@ -10,6 +10,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}/quartz
+  THEME_NAME: typomagical
 
 jobs:
   sync-and-build:
@@ -65,6 +66,9 @@ jobs:
           fi
           git commit -m "Auto-sync notes from kintsugi-zuihitsu $(date)"
           git push
+
+      - name: Fetch Quartz Theme
+        run: curl -s -S https://raw.githubusercontent.com/saberzero1/quartz-themes/master/action.sh | bash -s -- $THEME_NAME
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
