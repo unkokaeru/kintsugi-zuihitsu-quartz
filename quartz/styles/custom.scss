@@ -1,3 +1,11 @@
 @use "./base.scss";
 
 // put your custom CSS here!
+
+// Custom font for hyperlinks - Alegreya SC all uppercase, and slightly smaller so the case fits better with body text
+// Only apply to links within article content (body text), not in headers, navigation, etc.
+article a {
+  font-family: "Alegreya SC", var(--bodyFont);
+  text-transform: uppercase;
+  font-size: 0.8em;
+}
