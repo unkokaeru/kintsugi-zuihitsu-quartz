@@ -1,18 +1,13 @@
-# Quartz v4
+﻿# Kintsugi Zuihitsu
 
-> “[One] who works with the door open gets all kinds of interruptions, but [they] also occasionally gets clues as to what the world is and what might be important.” — Richard Hamming
+> "When the Japanese mend broken objects, they aggrandize the damage with gold. They believe that when something's suffered damage and has a history it becomes more beautiful."  Traditional Japanese Proverb
 
-Quartz is a set of tools that helps you publish your [digital garden](https://jzhao.xyz/posts/networked-thought) and notes as a website for free.
-Quartz v4 features a from-the-ground rewrite focusing on end-user extensibility and ease-of-use.
+**Kintsugi Zuihitsu** is a digital garden that embodies the Japanese art of golden repair (kintsugi) and spontaneous reflection (zuihitsu). This space transforms scattered thoughts and broken learning attempts into a unified golden network of knowledge, following curiosity rather than rigid categorization.
 
-🔗 Read the documentation and get started: https://quartz.jzhao.xyz/
+Built with [Quartz v4](https://quartz.jzhao.xyz/), this site publishes personal notes and projects as an interconnected web of learning.
 
-[Join the Discord Community](https://discord.gg/cRFFHYye7t)
+ Visit the live site: <https://unkokaeru.github.io/kintsugi-zuihitsu-quartz>
 
-## Sponsors
+---
 
-<p align="center">
-  <a href="https://github.com/sponsors/jackyzha0">
-    <img src="https://cdn.jsdelivr.net/gh/jackyzha0/jackyzha0/sponsorkit/sponsors.svg" />
-  </a>
-</p>
+*"Following the brush wherever curiosity leads, mending each broken understanding with golden connections."*
