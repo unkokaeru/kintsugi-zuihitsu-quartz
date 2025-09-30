@@ -59,6 +59,7 @@ const config: QuartzConfig = {
       Plugin.CreatedModifiedDate({
         priority: ["frontmatter", "git", "filesystem"],
       }),
+      Plugin.RemoveDataviewJS(),
       Plugin.RunPythonPlugin(),
       Plugin.SyntaxHighlighting({
         theme: {
