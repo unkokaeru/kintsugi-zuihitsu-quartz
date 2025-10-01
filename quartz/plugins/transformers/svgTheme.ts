@@ -2,8 +2,6 @@ import { QuartzTransformerPlugin } from "../types"
 import { Root as HTMLRoot } from "hast"
 import { Element } from "hast"
 import { visit } from "unist-util-visit"
-import { VFile } from "vfile"
-import { BuildCtx } from "../../util/ctx"
 import path from "path"
 import fs from "fs"
 
@@ -28,24 +26,38 @@ const defaultOptions: Options = {
 
 // Track processed SVGs to avoid duplicates
 const processedSvgs = new Set<string>()
+// Track if we've already preprocessed all SVGs
+let hasPreprocessedAll = false
 
 export const SvgTheme: QuartzTransformerPlugin<Partial<Options>> = (userOpts) => {
   const opts: Options = { ...defaultOptions, ...userOpts }
+  
+  // Reset flags for new builds
+  hasPreprocessedAll = false
+  processedSvgs.clear()
 
   return {
     name: "SvgTheme",
-    htmlPlugins(ctx) {
+    markdownPlugins() {
       return [
-        // First pass - process all img tags
         () => {
-          return (tree: HTMLRoot, file: VFile) => {
+          return (tree) => {
+            // Pre-process all SVG files in content directory during markdown processing
+            preProcessAllSvgs(opts)
+            return tree
+          }
+        }
+      ]
+    },
+    htmlPlugins() {
+      return [
+        // Process all img tags to add themed classes
+        () => {
+          return (tree: HTMLRoot) => {
             visit(tree, "element", (node: Element) => {
               if (node.tagName === "img" && node.properties?.src) {
                 const src = node.properties.src as string
                 if (src.endsWith(".svg")) {
-                  // Process the SVG file and create variants
-                  processSvgFile(src, ctx, opts)
-                  
                   // Add themed class and data attributes for JavaScript to use
                   const currentClass = (node.properties.className as string[]) || []
                   if (!currentClass.includes(opts.cssClass!)) {
@@ -54,26 +66,6 @@ export const SvgTheme: QuartzTransformerPlugin<Partial<Options>> = (userOpts) =>
                   
                   // Add data attribute to store original src for theme switching
                   node.properties['data-original-src'] = src
-                }
-              }
-            })
-          }
-        },
-        // Second pass - catch any HTML img tags that were processed by rehype-raw
-        () => {
-          return (tree: HTMLRoot, file: VFile) => {
-            visit(tree, "element", (node: Element) => {
-              if (node.tagName === "img" && node.properties?.src) {
-                const src = node.properties.src as string
-                if (src.endsWith(".svg")) {
-                  // Check if already processed
-                  const hasClass = (node.properties.className as string[])?.includes(opts.cssClass!)
-                  if (!hasClass) {
-                    // Add themed class and data attributes
-                    const currentClass = (node.properties.className as string[]) || []
-                    node.properties.className = [...currentClass, opts.cssClass!]
-                    node.properties['data-original-src'] = src
-                  }
                 }
               }
             })
@@ -95,7 +87,41 @@ export const SvgTheme: QuartzTransformerPlugin<Partial<Options>> = (userOpts) =>
   }
 }
 
-function processSvgFile(src: string, ctx: BuildCtx, opts: Options) {
+function preProcessAllSvgs(opts: Options) {
+  // Only preprocess once per build
+  if (hasPreprocessedAll) return
+  hasPreprocessedAll = true
+  
+  // Find all SVG files in the content directory
+  const contentDir = path.join(process.cwd(), 'content')
+  
+  try {
+    findAndProcessSvgs(contentDir, opts)
+  } catch (error) {
+    console.warn(`Failed to preprocess SVGs in ${contentDir}:`, error)
+  }
+}
+
+function findAndProcessSvgs(dir: string, opts: Options) {
+  if (!fs.existsSync(dir)) return
+  
+  const entries = fs.readdirSync(dir, { withFileTypes: true })
+  
+  for (const entry of entries) {
+    const fullPath = path.join(dir, entry.name)
+    
+    if (entry.isDirectory()) {
+      // Recursively process subdirectories
+      findAndProcessSvgs(fullPath, opts)
+    } else if (entry.isFile() && entry.name.endsWith('.svg')) {
+      // Process SVG file
+      const relativePath = path.relative(path.join(process.cwd(), 'content'), fullPath)
+      processSvgFile(relativePath, opts)
+    }
+  }
+}
+
+function processSvgFile(src: string, opts: Options) {
   // Skip if already processed
   const normalizedSrc = src.replace(/^\.\//, '')
   if (processedSvgs.has(normalizedSrc)) {
@@ -130,9 +156,9 @@ function processSvgFile(src: string, ctx: BuildCtx, opts: Options) {
       const lightVariantContent = generateLightVariant(svgContent)
       const darkVariantContent = generateDarkVariant(svgContent)
       
-      // Create variant filenames using the decoded path
+      // Create variant filenames using URL-safe names (replace spaces with dashes)
       const extension = path.extname(decodedSrc)
-      const baseName = path.basename(decodedSrc, extension)
+      const baseName = path.basename(decodedSrc, extension).replace(/\s+/g, '-')
       const dirName = path.dirname(decodedSrc)
       
       const lightVariantName = `${baseName}-light${extension}`
@@ -153,7 +179,7 @@ function processSvgFile(src: string, ctx: BuildCtx, opts: Options) {
       fs.writeFileSync(fullLightVariantPath, lightVariantContent)
       fs.writeFileSync(fullDarkVariantPath, darkVariantContent)
       
-      console.log(`Generated SVG variants: ${fullLightVariantPath} and ${fullDarkVariantPath}`)
+      console.log(`[SvgTheme] Generated themed variants for: ${path.basename(decodedSrc)}`)
       processedSvgs.add(normalizedSrc)
     } else {
       console.warn(`SVG file not found: ${src}`)
@@ -164,34 +190,7 @@ function processSvgFile(src: string, ctx: BuildCtx, opts: Options) {
   }
 }
 
-function analyzeSvgColors(svgContent: string): boolean {
-  // Simple heuristic: check for common light colors
-  const lightColorPatterns = [
-    /#fff/i, /white/i, /#f{6}/i, /#f{3}/i,
-    /#[e-f][0-9a-f]{5}/i, /#[e-f][0-9a-f]{2}/i
-  ]
-  
-  const darkColorPatterns = [
-    /#000/i, /black/i, /#0{6}/i, /#0{3}/i,
-    /#[0-3][0-9a-f]{5}/i, /#[0-3][0-9a-f]{2}/i
-  ]
-  
-  let lightMatches = 0
-  let darkMatches = 0
-  
-  lightColorPatterns.forEach(pattern => {
-    const matches = svgContent.match(new RegExp(pattern.source, 'gi'))
-    if (matches) lightMatches += matches.length
-  })
-  
-  darkColorPatterns.forEach(pattern => {
-    const matches = svgContent.match(new RegExp(pattern.source, 'gi'))
-    if (matches) darkMatches += matches.length
-  })
-  
-  // If no clear pattern, assume light (safer default)
-  return lightMatches >= darkMatches
-}
+
 
 function generateDarkVariant(svgContent: string): string {
   // Dark variant - for dark mode display (should be white/light)
