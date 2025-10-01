@@ -60,6 +60,7 @@ const config: QuartzConfig = {
         priority: ["frontmatter", "git", "filesystem"],
       }),
       Plugin.RemoveDataviewJS(),
+      Plugin.RemoveSpacedRepetition(),
       Plugin.RunPythonPlugin(),
       Plugin.SyntaxHighlighting({
         theme: {
