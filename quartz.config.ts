@@ -61,7 +61,6 @@ const config: QuartzConfig = {
       }),
       Plugin.RemoveDataviewJS(),
       Plugin.RemoveSpacedRepetition(),
-      Plugin.RunPythonPlugin(),
       Plugin.SyntaxHighlighting({
         theme: {
           light: "github-light",
@@ -69,6 +68,7 @@ const config: QuartzConfig = {
         },
         keepBackground: false,
       }),
+      Plugin.RunPythonPlugin(),
       Plugin.SvgTheme(),
       Plugin.ObsidianFlavoredMarkdown({ enableInHtmlEmbed: true }),
       Plugin.GitHubFlavoredMarkdown(),

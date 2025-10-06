@@ -14,6 +14,7 @@ export const RunPythonPlugin: QuartzTransformerPlugin = () => ({
         { content: "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css" },
         { content: "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/material-palenight.min.css" },
         { content: "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/base16-light.min.css" },
+
       ],
       js: [
         {
@@ -104,8 +105,26 @@ sys.stderr = io.StringIO()
 
             function enableAllPythonButtons() {
               console.log('Enabling all Python run buttons globally...');
-              document.querySelectorAll('.python-run-button').forEach(btn => {
+              const buttons = document.querySelectorAll('.python-run-button');
+              console.log('Found', buttons.length, 'Python run buttons');
+              buttons.forEach((btn, index) => {
+                console.log('Enabling button ' + (index + 1) + ':', btn.id, 'was disabled:', btn.disabled);
                 btn.disabled = false;
+                btn.removeAttribute('disabled');
+                // Also remove any CSS classes that might make it appear disabled
+                btn.classList.remove('disabled');
+                // Add visual feedback
+                btn.style.opacity = '1';
+                btn.style.cursor = 'pointer';
+                btn.style.backgroundColor = 'var(--secondary, #577367)';
+                btn.style.color = 'white';
+                
+                // Force a test click handler to verify button is clickable
+                btn.addEventListener('click', function(e) {
+                  console.log('Button clicked!', btn.id);
+                }, { once: false });
+                
+                console.log('Button ' + (index + 1) + ' is now disabled:', btn.disabled);
               });
             }
 
@@ -114,6 +133,17 @@ sys.stderr = io.StringIO()
               if (window.pyodideInstance) {
                 console.log('Pyodide ready, ensuring all buttons are enabled...');
                 enableAllPythonButtons();
+                // Also check button states after enabling
+                setTimeout(() => {
+                  const buttons = document.querySelectorAll('.python-run-button');
+                  console.log('Post-enable check: found', buttons.length, 'buttons');
+                  buttons.forEach((btn, i) => {
+                    console.log('Button', i + 1, btn.id, 'disabled:', btn.disabled, 'hasDisabledAttr:', btn.hasAttribute('disabled'));
+                    console.log('  - computed style cursor:', window.getComputedStyle(btn).cursor);
+                    console.log('  - computed style opacity:', window.getComputedStyle(btn).opacity);
+                    console.log('  - computed style background:', window.getComputedStyle(btn).backgroundColor);
+                  });
+                }, 500);
               } else if (!window.isPyodideLoading) {
                 console.log('Pyodide not loaded, starting load...');
                 loadPyodideGlobal().catch(err => {
@@ -252,10 +282,267 @@ img_str
             // Make the execution function globally available
             window.executePythonBlock = executePythonBlock;
 
+            // Track initialized blocks to prevent duplicates
+            const initializedBlocks = new Set();
+            
+            // Initialize individual code blocks
+            function initializeAllCodeBlocks() {
+              console.log('Initializing all code blocks...');
+              
+              // Find blocks by button IDs (most reliable method)
+              const pythonButtons = document.querySelectorAll('.python-run-button');
+              const blockIds = [];
+              
+              pythonButtons.forEach(btn => {
+                if (btn.id && btn.id.endsWith('-button')) {
+                  const blockId = btn.id.replace('-button', '');
+                  blockIds.push(blockId);
+                }
+              });
+              
+              console.log('Found', blockIds.length, 'code blocks to initialize:', blockIds);
+              
+              // Initialize each block only once
+              blockIds.forEach(blockId => {
+                if (!initializedBlocks.has(blockId)) {
+                  console.log('Initializing block:', blockId);
+                  initializeCodeBlock(blockId);
+                  initializedBlocks.add(blockId);
+                } else {
+                  console.log('Block', blockId, 'already initialized, skipping');
+                }
+              });
+              
+              console.log('Block initialization complete. Initialized blocks:', Array.from(initializedBlocks));
+            }
+
+            function initializeCodeBlock(blockId) {
+              console.log('Setting up block:', blockId);
+              
+              // Check if this block is already initialized
+              if (window.codeMirrorInstances && window.codeMirrorInstances[blockId]) {
+                console.log('Block', blockId, 'already has CodeMirror instance, skipping initialization');
+                return;
+              }
+              
+              const codeContent = document.getElementById('codeContent-' + blockId);
+              const codeTextarea = document.getElementById('codeTextarea-' + blockId);
+              const codeGradient = document.getElementById('codeGradient-' + blockId);
+              const copyBtn = document.getElementById(blockId + '-copy');
+              const runBtn = document.getElementById(blockId + '-button');
+              const expandBtn = document.getElementById(blockId + '-expand');
+              const closeOutputBtn = document.getElementById(blockId + '-closeOutputBtn');
+              const outputWrapper = document.getElementById(blockId + '-outputWrapper');
+              const textOutput = document.getElementById(blockId + '-text');
+              const plotOutput = document.getElementById(blockId + '-plot');
+
+              if (!codeTextarea) {
+                console.error('Could not find textarea for block:', blockId);
+                return;
+              }
+
+              let isExpanded = false;
+              let editorInstance = null;
+
+              // SVG definitions
+              const svgCopy = {
+                  attrs: { xmlns: 'http://www.w3.org/2000/svg', width: '16', height: '16', viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
+                  children: [
+                      { tag: 'rect', attrs: { x: '9', y: '9', width: '13', height: '13', rx: '2', ry: '2' } },
+                      { tag: 'path', attrs: { d: 'M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1' } }
+                  ]
+              };
+              const svgPlay = {
+                  attrs: { xmlns: 'http://www.w3.org/2000/svg', width: '16', height: '16', viewBox: '0 0 24 24', fill: 'currentColor', stroke: 'currentColor', 'stroke-width': '1', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, 
+                  children: [ { tag: 'polygon', attrs: { points: '5 3 19 12 5 21 5 3' } } ]
+              };
+              const svgExpand = {
+                  attrs: { xmlns: 'http://www.w3.org/2000/svg', width: '16', height: '16', viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
+                  children: [ { tag: 'polyline', attrs: { points: '6 9 12 15 18 9' } } ] 
+              };
+              const svgCollapse = { 
+                  attrs: { xmlns: 'http://www.w3.org/2000/svg', width: '16', height: '16', viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
+                  children: [ { tag: 'polyline', attrs: { points: '18 15 12 9 6 15' } } ]
+              };
+              const svgCheck = { 
+                  attrs: { xmlns: 'http://www.w3.org/2000/svg', width: '16', height: '16', viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
+                  children: [ { tag: 'polyline', attrs: { points: '20 6 9 17 4 12' } } ]
+              };
+              const svgClose = {
+                    attrs: { xmlns: 'http://www.w3.org/2000/svg', width: '16', height: '16', viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
+                    children: [
+                        { tag: 'line', attrs: { x1: '18', y1: '6', x2: '6', y2: '18' } },
+                        { tag: 'line', attrs: { x1: '6', y1: '6', x2: '18', y2: '18' } }
+                    ]
+                };
+
+              // Helper function to create SVG elements
+              function createSvgElement(svgData) {
+                  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                  for (const attr in svgData.attrs) {
+                      svg.setAttribute(attr, svgData.attrs[attr]);
+                  }
+                  svgData.children.forEach(childData => {
+                      const child = document.createElementNS('http://www.w3.org/2000/svg', childData.tag);
+                      for (const attr in childData.attrs) {
+                          child.setAttribute(attr, childData.attrs[attr]);
+                      }
+                      svg.appendChild(child);
+                  });
+                  return svg;
+              }
+
+              // Initialize CodeMirror editor
+              function initializeEditor() {
+                  if (typeof CodeMirror === 'undefined') {
+                      console.log('CodeMirror not loaded yet, retrying for block:', blockId);
+                      setTimeout(initializeEditor, 100);
+                      return;
+                  }
+
+                  console.log('Initializing CodeMirror for block:', blockId);
+                  editorInstance = CodeMirror.fromTextArea(codeTextarea, {
+                    mode: 'python',
+                    theme: 'material-palenight',
+                    lineNumbers: true,
+                    lineWrapping: true,
+                    readOnly: false,
+                    viewportMargin: Infinity,
+                    scrollbarStyle: 'null',
+                  });
+
+                  window.codeMirrorInstances = window.codeMirrorInstances || {};
+                  window.codeMirrorInstances[blockId] = editorInstance;
+
+                  // Set initial size
+                  editorInstance.setSize(null, 150);
+
+                  const codeBlock = editorInstance.getWrapperElement();
+                  editorInstance.on('focus', () => codeBlock.classList.add('cm-focused'));
+                  editorInstance.on('blur', () => codeBlock.classList.remove('cm-focused'));
+              }
+
+              // Setup all button event handlers
+              function setupButtons() {
+                  // Add SVG icons to buttons
+                  if (copyBtn) copyBtn.appendChild(createSvgElement(svgCopy));
+                  if (runBtn) {
+                      const playIcon = runBtn.querySelector('.play-icon');
+                      if (playIcon) playIcon.appendChild(createSvgElement(svgPlay));
+                  }
+                  if (expandBtn) expandBtn.appendChild(createSvgElement(svgExpand));
+                  if (closeOutputBtn) closeOutputBtn.appendChild(createSvgElement(svgClose));
+
+                  // Expand/collapse functionality
+                  if (expandBtn) {
+                      expandBtn.addEventListener('click', () => {
+                          isExpanded = !isExpanded;
+                          
+                          if (isExpanded) {
+                              // Expanding
+                              if (codeContent) {
+                                  codeContent.classList.add('expanded');
+                                  codeContent.style.height = 'auto';
+                                  codeContent.style.maxHeight = '600px';
+                              }
+                              
+                              if (codeGradient) codeGradient.style.opacity = '0';
+                              
+                              if (editorInstance) {
+                                  editorInstance.setSize(null, 'auto');
+                                  setTimeout(() => {
+                                      editorInstance.refresh();
+                                  }, 50);
+                              }
+                          } else {
+                              // Collapsing
+                              if (codeContent) {
+                                  codeContent.classList.remove('expanded');
+                                  codeContent.style.height = '150px';
+                                  codeContent.style.maxHeight = '150px';
+                              }
+                              
+                              if (codeGradient) codeGradient.style.opacity = '1';
+                              
+                              if (editorInstance) {
+                                  editorInstance.setSize(null, '150px');
+                                  setTimeout(() => {
+                                      editorInstance.refresh();
+                                  }, 50);
+                              }
+                          }
+
+                          // Update button icon
+                          expandBtn.innerHTML = ''; 
+                          expandBtn.appendChild(createSvgElement(isExpanded ? svgCollapse : svgExpand));
+                      });
+                  }
+
+                  // Copy functionality
+                  if (copyBtn) {
+                      copyBtn.addEventListener('click', () => {
+                          if (!editorInstance) return;
+                          navigator.clipboard.writeText(editorInstance.getValue()).then(() => {
+                              copyBtn.classList.add('copied');
+                              copyBtn.innerHTML = ''; 
+                              copyBtn.appendChild(createSvgElement(svgCheck)); 
+                              setTimeout(() => {
+                                  copyBtn.classList.remove('copied');
+                                  copyBtn.innerHTML = ''; 
+                                  copyBtn.appendChild(createSvgElement(svgCopy)); 
+                              }, 1500); 
+                          }).catch(err => {
+                              console.error('Failed to copy code:', err);
+                          });
+                      });
+                  }
+
+                  // Run functionality
+                  if (runBtn) {
+                      runBtn.addEventListener('click', () => {
+                          console.log('Run button clicked for block:', blockId);
+                          if (typeof window.executePythonBlock === 'function') {
+                              window.executePythonBlock(blockId); 
+                          } else {
+                              console.error('Global executePythonBlock function not found!');
+                              if (textOutput) {
+                                  textOutput.textContent = 'Error: Execution environment not ready.';
+                                  if (outputWrapper) outputWrapper.classList.add('expanded');
+                              }
+                          }
+                      });
+                  }
+
+                  // Close output functionality
+                  if (closeOutputBtn) {
+                      closeOutputBtn.addEventListener('click', () => {
+                          if (textOutput) {
+                              textOutput.innerHTML = ''; 
+                              textOutput.classList.remove('error', 'success'); 
+                          }
+                          if (plotOutput) plotOutput.innerHTML = ''; 
+                          if (outputWrapper) outputWrapper.classList.remove('expanded'); 
+                      });
+                  }
+              }
+
+              // Initialize everything
+              initializeEditor();
+              setupButtons();
+              
+              console.log('Block', blockId, 'initialization complete');
+            }
+
             // Initial setup and page visibility handling
             function initializePage() {
               console.log('Initializing page for Pyodide...');
               checkAndEnableButtons();
+              
+              // Initialize blocks after a short delay to ensure DOM is ready
+              setTimeout(() => {
+                console.log('Initializing blocks...');
+                initializeAllCodeBlocks();
+              }, 200);
             }
 
             // Event listeners for various page scenarios
@@ -310,9 +597,10 @@ img_str
           
           if (isRunnable && parent?.children && index !== undefined) {
             const id = generateBlockId()
+            console.log('Processing runnable Python block with id:', id, 'containing:', node.value?.substring(0, 100) + '...');
 
             const htmlContent = `
-<div class='code-wrapper' id='wrapper-${id}'>
+<div class='code-wrapper' id='wrapper-${id}' data-block-id='${id}'>
   <div class='code-block'>
     <div class='code-header'>
       <div class='code-language'>Python</div>
@@ -342,204 +630,6 @@ img_str
     </div>
 </div>
 
-<script src='https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js'></script>
-<script src='https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/python/python.min.js'></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/material-palenight.min.css" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/base16-light.min.css" />
-
-<script>
-(function() {
-  // --- Script specific to block ${id} ---
-
-  const blockId = '${id}'; 
-  const codeContent = document.getElementById('codeContent-' + blockId);
-  const codeTextarea = document.getElementById('codeTextarea-' + blockId);
-  const codeGradient = document.getElementById('codeGradient-' + blockId);
-  const copyBtn = document.getElementById(blockId + '-copy');
-  const runBtn = document.getElementById(blockId + '-button');
-  const expandBtn = document.getElementById(blockId + '-expand');
-  const closeOutputBtn = document.getElementById(blockId + '-closeOutputBtn');
-  const outputWrapper = document.getElementById(blockId + '-outputWrapper');
-  const textOutput = document.getElementById(blockId + '-text');
-  const plotOutput = document.getElementById(blockId + '-plot');
-
-  let isExpanded = false;
-  let editorInstance = null; 
-
-  // wierd way of doing svg, but it is necessary for compilation bugs
-  function createSvgElement(svgData) {
-      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-      for (const attr in svgData.attrs) {
-          svg.setAttribute(attr, svgData.attrs[attr]);
-      }
-      svgData.children.forEach(childData => {
-          const child = document.createElementNS('http://www.w3.org/2000/svg', childData.tag);
-          for (const attr in childData.attrs) {
-              child.setAttribute(attr, childData.attrs[attr]);
-          }
-          svg.appendChild(child);
-      });
-      return svg;
-  }
-
-  const svgCopy = {
-      attrs: { xmlns: 'http://www.w3.org/2000/svg', width: '16', height: '16', viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
-      children: [
-          { tag: 'rect', attrs: { x: '9', y: '9', width: '13', height: '13', rx: '2', ry: '2' } },
-          { tag: 'path', attrs: { d: 'M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1' } }
-      ]
-  };
-  const svgPlay = {
-      attrs: { xmlns: 'http://www.w3.org/2000/svg', width: '16', height: '16', viewBox: '0 0 24 24', fill: 'currentColor', stroke: 'currentColor', 'stroke-width': '1', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, 
-      children: [ { tag: 'polygon', attrs: { points: '5 3 19 12 5 21 5 3' } } ]
-  };
-  const svgExpand = {
-      attrs: { xmlns: 'http://www.w3.org/2000/svg', width: '16', height: '16', viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
-      children: [ { tag: 'polyline', attrs: { points: '6 9 12 15 18 9' } } ] 
-  };
-   const svgCollapse = { 
-      attrs: { xmlns: 'http://www.w3.org/2000/svg', width: '16', height: '16', viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
-      children: [ { tag: 'polyline', attrs: { points: '18 15 12 9 6 15' } } ]
-  };
-  const svgCheck = { 
-      attrs: { xmlns: 'http://www.w3.org/2000/svg', width: '16', height: '16', viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
-      children: [ { tag: 'polyline', attrs: { points: '20 6 9 17 4 12' } } ]
-  };
-   const svgClose = {
-        attrs: { xmlns: 'http://www.w3.org/2000/svg', width: '16', height: '16', viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
-        children: [
-            { tag: 'line', attrs: { x1: '18', y1: '6', x2: '6', y2: '18' } },
-            { tag: 'line', attrs: { x1: '6', y1: '6', x2: '18', y2: '18' } }
-        ]
-    };
-
-  function initializeEditorWhenReady() {
-      if (typeof CodeMirror !== 'undefined' ? Boolean(codeTextarea) : false) {
-          console.log('CodeMirror ready for block:', blockId);
-          editorInstance = CodeMirror.fromTextArea(codeTextarea, {
-            mode: 'python',
-            theme: 'material-palenight',
-            lineNumbers: true,
-            lineWrapping: true,
-            readOnly: false,
-            viewportMargin: Infinity,
-            scrollbarStyle: 'null',
-          });
-
-           window.codeMirrorInstances = window.codeMirrorInstances || {};
-           window.codeMirrorInstances[blockId] = editorInstance;
-
-           // Set initial size
-           editorInstance.setSize(null, 150);
-
-          const codeBlock = editorInstance.getWrapperElement();
-
-           editorInstance.on('focus', () => codeBlock.classList.add('cm-focused'));
-           editorInstance.on('blur', () => codeBlock.classList.remove('cm-focused'));
-
-           // Check if Pyodide is ready and enable button if so
-           if (window.pyodideInstance) {
-               runBtn.disabled = false;
-           }
-
-      } else {
-          console.log('CodeMirror not ready yet for block ' + blockId + ', retrying...');
-          setTimeout(initializeEditorWhenReady, 100);
-      }
-  }
-
-  function setupButtons() {
-      copyBtn.appendChild(createSvgElement(svgCopy));
-      runBtn.querySelector('.play-icon').appendChild(createSvgElement(svgPlay));
-      expandBtn.appendChild(createSvgElement(svgExpand)); 
-      closeOutputBtn.appendChild(createSvgElement(svgClose));
-
-      expandBtn.addEventListener('click', () => {
-          isExpanded = !isExpanded;
-          
-          if (isExpanded) {
-              // Expanding
-              codeContent.classList.add('expanded');
-              codeContent.style.height = 'auto';
-              codeContent.style.maxHeight = '600px';
-              
-              codeGradient.style.opacity = '0';
-              
-              if (editorInstance) {
-                  editorInstance.setSize(null, 'auto');
-                  setTimeout(() => {
-                      editorInstance.refresh();
-                  }, 50);
-              }
-          } else {
-              // Collapsing
-              codeContent.classList.remove('expanded');
-              codeContent.style.height = '150px';
-              codeContent.style.maxHeight = '150px';
-              
-              codeGradient.style.opacity = '1';
-              
-              if (editorInstance) {
-                  editorInstance.setSize(null, '150px');
-                  setTimeout(() => {
-                      editorInstance.refresh();
-                  }, 50);
-              }
-          }
-
-          // Update button icon
-          expandBtn.innerHTML = ''; 
-          expandBtn.appendChild(createSvgElement(isExpanded ? svgCollapse : svgExpand));
-      });
-
-      copyBtn.addEventListener('click', () => {
-          if (!editorInstance) return;
-          navigator.clipboard.writeText(editorInstance.getValue()).then(() => {
-              copyBtn.classList.add('copied');
-              copyBtn.innerHTML = ''; 
-              copyBtn.appendChild(createSvgElement(svgCheck)); 
-              setTimeout(() => {
-                  copyBtn.classList.remove('copied');
-                  copyBtn.innerHTML = ''; 
-                  copyBtn.appendChild(createSvgElement(svgCopy)); 
-              }, 1500); 
-          }).catch(err => {
-              console.error('Failed to copy code:', err);
-          });
-      });
-
-      runBtn.addEventListener('click', () => {
-         console.log('Run button clicked for block:', blockId);
-         if (typeof window.executePythonBlock === 'function') {
-             window.executePythonBlock(blockId); 
-         } else {
-             console.error('Global executePythonBlock function not found!');
-             textOutput.textContent = 'Error: Execution environment not ready.';
-             outputWrapper.classList.add('expanded');
-         }
-      });
-
-      closeOutputBtn.addEventListener('click', () => {
-          textOutput.innerHTML = ''; 
-          textOutput.classList.remove('error', 'success'); 
-          plotOutput.innerHTML = ''; 
-          outputWrapper.classList.remove('expanded'); 
-      });
-  }
-
-  if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', () => {
-         initializeEditorWhenReady();
-         setupButtons();
-      });
-  } else {
-      initializeEditorWhenReady();
-      setupButtons();
-  }
-
-})(); 
-</script>
 `
 
             const newNode = {
