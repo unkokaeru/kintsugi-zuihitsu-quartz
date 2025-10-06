@@ -70,7 +70,10 @@ const config: QuartzConfig = {
       }),
       Plugin.RunPythonPlugin(),
       Plugin.SvgTheme(),
-      Plugin.ObsidianFlavoredMarkdown({ enableInHtmlEmbed: true }),
+      Plugin.ObsidianFlavoredMarkdown({ 
+        enableInHtmlEmbed: true,
+        parseArrows: false 
+      }),
       Plugin.GitHubFlavoredMarkdown(),
       Plugin.FolderOverview(),
       Plugin.TableOfContents(),
