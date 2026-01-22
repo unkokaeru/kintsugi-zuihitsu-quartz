@@ -112,3 +112,85 @@ h1 {
   padding-left: 0px;
   text-align: left;
 }
+
+// Unique index page styling
+body:has([data-slug="index"]) {
+  .page > #quartz-body {
+    // Center the content more on index page
+    .center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      
+      article {
+        max-width: 800px;
+        
+        // Hero image styling
+        img {
+          border-radius: 12px;
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+          margin: 2rem 0 3rem 0;
+          animation: fadeInScale 0.8s ease-out;
+        }
+        
+        // Make the title more prominent
+        h1 {
+          font-size: 2.5rem;
+          margin-bottom: 2rem;
+          background: linear-gradient(135deg, var(--secondary), var(--tertiary));
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+        
+        // Style the intro paragraph
+        > p:first-of-type {
+          font-size: 1.15rem;
+          line-height: 1.8;
+          text-align: center;
+          padding: 0 2rem;
+          color: var(--darkgray);
+        }
+        
+        // Style the second paragraph (structure description)
+        > p:nth-of-type(2) {
+          font-size: 1.05rem;
+          line-height: 1.7;
+          text-align: center;
+          padding: 0 1rem;
+          margin-bottom: 2rem;
+        }
+        
+        // To-Do section styling
+        h2 {
+          margin-top: 3rem;
+          text-align: center;
+          color: var(--secondary);
+          font-size: 1.8rem;
+        }
+      }
+    }
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @keyframes fadeInScale {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+}
