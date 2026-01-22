@@ -21,6 +21,68 @@
   }
 }
 
+.reader-settings-panel {
+  position: fixed;
+  bottom: 5rem;
+  right: 2rem;
+  background: var(--light);
+  border: 1px solid var(--lightgray);
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  min-width: 250px;
+
+  h4 {
+    margin: 0 0 1rem 0;
+    font-size: 1rem;
+    color: var(--dark);
+  }
+
+  .settings-group {
+    margin-bottom: 1rem;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--darkgray);
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 0.5rem;
+
+      button {
+        flex: 1;
+        padding: 0.5rem;
+        background: var(--lightgray);
+        border: 1px solid var(--gray);
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        color: var(--darkgray);
+        transition: all 0.2s ease;
+
+        &:hover {
+          background: var(--highlight);
+        }
+
+        &.active {
+          background: var(--secondary);
+          color: var(--light);
+          border-color: var(--secondary);
+        }
+      }
+    }
+  }
+}
+
 :root[reader-mode="on"] {
   & .sidebar.left,
   & .sidebar.right {
@@ -30,5 +92,54 @@
     &:hover {
       opacity: 1;
     }
+  }
+}
+
+// Font size settings
+:root[reader-font-size="small"] {
+  & article {
+    font-size: 0.9rem;
+  }
+}
+
+:root[reader-font-size="large"] {
+  & article {
+    font-size: 1.1rem;
+  }
+}
+
+// Line width settings
+:root[reader-line-width="narrow"] {
+  & article {
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+:root[reader-line-width="wide"] {
+  & article {
+    max-width: 900px;
+  }
+}
+
+// Background settings
+:root[reader-background="sepia"] {
+  & .page {
+    background: #f4f1ea;
+  }
+
+  & article {
+    color: #5c4e42;
+  }
+}
+
+:root[reader-background="warm"] {
+  & .page {
+    background: #fef9f3;
+  }
+
+  & article {
+    color: #3e3832;
   }
 }
