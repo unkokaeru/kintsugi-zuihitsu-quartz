@@ -25,6 +25,8 @@ import Flex from "./Flex"
 import ConditionalRender from "./ConditionalRender"
 import Sunlit from "./Sunlit"
 import PrintButton from "./PrintButton"
+import KeyboardHelp from "./KeyboardHelp"
+import ProgressBar from "./ProgressBar"
 
 export {
   ArticleTitle,
@@ -54,4 +56,6 @@ export {
   ConditionalRender,
   Sunlit,
   PrintButton,
+  KeyboardHelp,
+  ProgressBar,
 }
