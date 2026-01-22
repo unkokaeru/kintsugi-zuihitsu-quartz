@@ -12,6 +12,14 @@ function updateProgressBar() {
 
   // Calculate how far through the article we've scrolled
   const scrollableHeight = documentHeight - windowHeight
+  
+  // Prevent division by zero
+  if (scrollableHeight <= 0) {
+    progressBar.style.width = "100%"
+    progressBar.setAttribute("aria-valuenow", "100")
+    return
+  }
+  
   const scrolled = Math.max(0, scrollTop - articleTop)
   const progress = Math.min(100, (scrolled / scrollableHeight) * 100)
 

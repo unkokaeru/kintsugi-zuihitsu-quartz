@@ -1,5 +1,5 @@
 let keySequence = ""
-let sequenceTimeout: NodeJS.Timeout | null = null
+let sequenceTimeout: number | null = null
 
 const keyboardShortcuts: Record<string, () => void> = {
   // Single key shortcuts

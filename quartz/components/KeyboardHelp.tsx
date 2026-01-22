@@ -1,14 +1,17 @@
 // @ts-ignore
 import script from "./scripts/keyboard.inline"
+// @ts-ignore
+import closeScript from "./scripts/keyboardhelp.inline"
 import { QuartzComponent, QuartzComponentConstructor, QuartzComponentProps } from "./types"
 import { classNames } from "../util/lang"
+import { concatenateResources } from "../util/resources"
 
 const KeyboardHelp: QuartzComponent = ({ displayClass }: QuartzComponentProps) => {
   return (
     <div class={classNames(displayClass, "keyboard-help-modal")} style="display: none;">
       <div class="keyboard-help-content">
         <h2>Keyboard Shortcuts</h2>
-        <button class="close-help" onClick="this.closest('.keyboard-help-modal').style.display='none'">
+        <button class="close-help" aria-label="Close keyboard shortcuts help">
           ×
         </button>
         <div class="shortcuts-grid">
@@ -154,6 +157,6 @@ KeyboardHelp.css = `
 }
 `
 
-KeyboardHelp.afterDOMLoaded = script
+KeyboardHelp.afterDOMLoaded = concatenateResources(script, closeScript)
 
 export default (() => KeyboardHelp) satisfies QuartzComponentConstructor

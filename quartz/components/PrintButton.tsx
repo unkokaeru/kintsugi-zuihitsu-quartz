@@ -1,3 +1,5 @@
+// @ts-ignore
+import script from "./scripts/printbutton.inline"
 import { QuartzComponent, QuartzComponentConstructor, QuartzComponentProps } from "./types"
 import { i18n } from "../i18n"
 import { classNames } from "../util/lang"
@@ -7,7 +9,6 @@ const PrintButton: QuartzComponent = ({ displayClass, cfg }: QuartzComponentProp
   return (
     <button
       class={classNames(displayClass, "print-button")}
-      onClick="window.print()"
       aria-label={i18n(cfg.locale).components.printButton?.title || "Print this page"}
     >
       <svg
@@ -32,5 +33,6 @@ const PrintButton: QuartzComponent = ({ displayClass, cfg }: QuartzComponentProp
 }
 
 PrintButton.css = style
+PrintButton.afterDOMLoaded = script
 
 export default (() => PrintButton) satisfies QuartzComponentConstructor
