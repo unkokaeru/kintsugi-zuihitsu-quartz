@@ -123,8 +123,8 @@
   }
 }
 
-// Background settings
-:root[reader-background="sepia"] {
+// Background settings - Light mode
+:root[reader-background="sepia"]:not([saved-theme="dark"]) {
   & .page {
     background: #f4f1ea;
   }
@@ -134,12 +134,33 @@
   }
 }
 
-:root[reader-background="warm"] {
+:root[reader-background="warm"]:not([saved-theme="dark"]) {
   & .page {
     background: #fef9f3;
   }
 
   & article {
     color: #3e3832;
+  }
+}
+
+// Background settings - Dark mode
+:root[reader-background="sepia"][saved-theme="dark"] {
+  & .page {
+    background: #2a2520;
+  }
+
+  & article {
+    color: #d4c5b0;
+  }
+}
+
+:root[reader-background="warm"][saved-theme="dark"] {
+  & .page {
+    background: #2d2520;
+  }
+
+  & article {
+    color: #d9cdb8;
   }
 }
