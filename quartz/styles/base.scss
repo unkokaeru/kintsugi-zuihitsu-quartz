@@ -4,19 +4,27 @@
 @use "./syntax.scss";
 @use "./callouts.scss";
 
+* {
+  box-sizing: border-box;
+}
+
 html {
   scroll-behavior: smooth;
   text-size-adjust: none;
   overflow-x: hidden;
-  width: 100vw;
+  width: 100%;
+  max-width: 100vw;
 }
 
 body {
   margin: 0;
-  box-sizing: border-box;
+  padding: 0;
   background-color: var(--light);
   font-family: var(--bodyFont);
   color: var(--darkgray);
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
 }
 
 .text-highlight {
@@ -51,13 +59,32 @@ ul,
 .math {
   &.math-display {
     text-align: center;
+    overflow-x: auto;
   }
 }
 
 article {
+  max-width: 100%;
+  width: 100%;
+  
+  @media all and ($mobile) {
+    max-width: 100vw;
+    width: 100%;
+    overflow-x: hidden;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    
+    // Force all children to not exceed viewport
+    & > * {
+      max-width: 100%;
+    }
+  }
+  
   > mjx-container.MathJax,
   blockquote > div > mjx-container.MathJax {
     display: flex;
+    overflow-x: auto;
+    max-width: 100%;
     > svg {
       margin-left: auto;
       margin-right: auto;
@@ -158,7 +185,10 @@ a {
 
 .page {
   max-width: 100%;
-  margin: 0 auto;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
   
   // On very wide screens, use full width
   @media all and ($widescreen) {
@@ -168,7 +198,11 @@ a {
   
   // Better mobile spacing
   @media all and ($mobile) {
-    padding: 0 0.5rem;
+    max-width: 100vw;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    overflow-x: hidden;
   }
   
   & article {
@@ -266,7 +300,11 @@ a {
       padding: 0 1rem;
     }
     @media all and ($mobile) {
-      margin: 0 auto;
+      margin: 0;
+      padding: 0 0.75rem;
+      overflow-x: hidden;
+      width: 100%;
+      max-width: 100vw;
     }
 
     & .sidebar {
@@ -299,15 +337,23 @@ a {
       @media all and ($mobile) {
         gap: 0.5rem;
         align-items: center;
-        position: initial;
+        position: sticky;
+        top: 0;
+        z-index: 100;
         display: flex;
         height: unset;
         flex-direction: row;
-        padding: 0.75rem 0.5rem;
-        background: var(--light);
-        border-bottom: 1px solid var(--lightgray);
-        margin: 0 -0.5rem;
-        width: calc(100% + 1rem);
+        flex-wrap: nowrap;
+        justify-content: space-between;
+        padding: 0.6rem 0.75rem;
+        background: color-mix(in srgb, var(--light) 80%, transparent);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-bottom: 1px solid color-mix(in srgb, var(--lightgray) 50%, transparent);
+        margin: 0;
+        width: 100%;
+        max-width: 100vw;
+        min-width: 0;
       }
     }
 
@@ -324,8 +370,10 @@ a {
       }
       
       @media all and ($mobile) {
-        margin-left: inherit;
-        margin-right: inherit;
+        display: none !important;
+        visibility: hidden;
+        position: absolute;
+        left: -9999px;
       }
       @media all and not ($desktop) {
         position: initial;
@@ -337,6 +385,7 @@ a {
           flex: 1;
           max-height: 24rem;
         }
+        // ToC is shown in mobile explorer menu, hidden here
         & > .toc {
           display: none;
         }
@@ -373,15 +422,20 @@ a {
     & .center,
     & footer {
       max-width: 100%;
-      min-width: 100%;
+      min-width: 0;
+      width: 100%;
       margin-left: auto;
       margin-right: auto;
       @media all and ($tablet) {
         margin-right: 0;
       }
       @media all and ($mobile) {
-        margin-right: 0;
-        margin-left: 0;
+        margin: 0;
+        padding: 0;
+        max-width: 100vw;
+        width: 100%;
+        min-width: 0;
+        overflow-x: hidden;
       }
     }
     & footer {
@@ -744,5 +798,133 @@ select {
   
   html {
     scroll-behavior: auto;
+  }
+}
+
+// MOBILE FIX: Force all elements to fit within viewport
+@media all and ($mobile) {
+  // Global overflow and wrapping
+  html, body, .page, #quartz-body, .center, article, footer {
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+  }
+  
+  // Force word wrapping on ALL text elements
+  *, *::before, *::after {
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    word-break: break-word !important;
+    hyphens: auto;
+  }
+  
+  // Ensure images, pre, code blocks don't overflow
+  img, video, iframe, embed, object, svg {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+  
+  // Scrollable code blocks
+  pre {
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    white-space: pre-wrap !important;
+    word-wrap: break-word !important;
+  }
+  
+  code {
+    max-width: 100% !important;
+    white-space: pre-wrap !important;
+    word-wrap: break-word !important;
+  }
+  
+  // Tables must scroll
+  table {
+    max-width: 100% !important;
+    display: block !important;
+    overflow-x: auto !important;
+  }
+  
+  // Fix any elements with fixed widths
+  .table-container, figure, blockquote, .callout {
+    max-width: 100% !important;
+    overflow-x: auto !important;
+  }
+  
+  // MathJax containers
+  mjx-container, .katex-display, .math-display {
+    max-width: 100% !important;
+    overflow-x: auto !important;
+  }
+  
+  // Links with long URLs
+  a {
+    word-break: break-all !important;
+  }
+  
+  // Page header and content meta
+  .page-header, .content-meta, .breadcrumb-container {
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+  }
+  
+  // Any direct children of article
+  article > * {
+    max-width: 100% !important;
+  }
+  
+  // MOBILE HEADER LAYOUT
+  // Structure: PageTitle, Spacer, Flex(Search, Darkmode, ReaderMode, PrintButton), Explorer
+  // We want: [Explorer/Menu] [Title] [Search] [Icons]
+  .sidebar.left {
+    // Explorer (hamburger menu) - first
+    & > .explorer {
+      order: 1 !important;
+      flex-shrink: 0;
+    }
+    
+    // Page title - second, takes remaining space
+    & > .page-title {
+      order: 2 !important;
+      flex: 1 1 auto !important;
+      min-width: 0;
+      margin: 0 0.25rem;
+      overflow: hidden;
+    }
+    
+    // Hide mobile spacer
+    & > .spacer {
+      display: none !important;
+    }
+    
+    // Flex container with search and icons - last
+    & > .flex-component {
+      order: 3 !important;
+      flex: 0 0 auto !important;
+      gap: 0.35rem !important;
+      min-width: 0;
+      
+      // Search inside flex
+      & > div:has(.search) {
+        flex: 0 0 auto !important;
+        min-width: 0;
+      }
+      
+      // Icon buttons inside flex
+      & > div:has(.darkmode),
+      & > div:has(.readermode),
+      & > div:has(.print-button) {
+        flex: 0 0 auto !important;
+      }
+    }
+    
+    // Hide ToC from header bar
+    & > .toc {
+      display: none !important;
+    }
+  }
+  
+  // Ensure sidebar.right is completely hidden on mobile
+  .sidebar.right {
+    display: none !important;
   }
 }

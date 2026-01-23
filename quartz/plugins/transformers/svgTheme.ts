@@ -251,7 +251,7 @@ function generateThemeSwapScript(opts: Options): string {
       const pathParts = originalSrc.split('/');
       const filename = pathParts.pop();
       const extension = filename.includes('.') ? '.' + filename.split('.').pop() : '';
-      const baseName = filename.replace(extension, '');
+      const baseName = filename.replace(extension, '').replace(/\\s+/g, '-');
       const directory = pathParts.join('/');
       
       // Determine which variant to use
@@ -283,10 +283,20 @@ function generateThemeSwapScript(opts: Options): string {
     });
   }
   
-  // Update on page load
+  // Update on initial page load
   updateSvgSources();
   
-  // Update when theme changes
+  // Update on SPA navigation
+  document.addEventListener('nav', () => {
+    updateSvgSources();
+  });
+  
+  // Listen for theme change custom event
+  document.addEventListener('themechange', () => {
+    updateSvgSources();
+  });
+  
+  // Update when theme changes via attribute mutation
   const observer = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {
       if (mutation.type === 'attributes' && 

@@ -18,6 +18,18 @@ PageTitle.css = `
   font-size: 1.75rem;
   margin: 0;
   font-family: var(--titleFont);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media all and (max-width: 800px) {
+  .page-title {
+    font-size: 1.1rem;
+    flex: 1;
+    text-align: center;
+  }
 }
 `
 

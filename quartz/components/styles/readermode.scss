@@ -27,23 +27,28 @@
   right: 2rem;
   background: var(--light);
   border: 1px solid var(--lightgray);
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 1.5rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
   z-index: 1000;
   min-width: 280px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  background: color-mix(in srgb, var(--light) 85%, transparent);
   
-  // Mobile: full width at bottom
+  // Mobile: full width at bottom sheet
   @media all and (max-width: 800px) {
     left: 0;
     right: 0;
     bottom: 0;
-    border-radius: 16px 16px 0 0;
-    padding: 1.5rem 1.5rem 2rem 1.5rem;
+    border-radius: 20px 20px 0 0;
+    padding: 1.5rem 1.5rem 2.5rem 1.5rem;
     min-width: unset;
     width: 100%;
     box-sizing: border-box;
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.15);
+    border: none;
+    border-top: 1px solid color-mix(in srgb, var(--lightgray) 50%, transparent);
   }
 
   h4 {
