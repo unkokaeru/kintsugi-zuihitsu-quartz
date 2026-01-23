@@ -58,6 +58,8 @@ ul.toc-content.overflow {
     padding-left: 0.5rem;
     border-left: 2px solid transparent;
     display: block;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
     
     &.in-view {
       opacity: 0.75;
@@ -70,7 +72,7 @@ ul.toc-content.overflow {
 
   @for $i from 0 through 6 {
     & .depth-#{$i} {
-      padding-left: calc(1rem * #{$i});
+      padding-left: calc(1rem * #{$i} + 0.5rem);
     }
   }
 }

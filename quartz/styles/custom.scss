@@ -114,7 +114,7 @@ h1 {
 }
 
 // Unique index page styling
-body:has([data-slug="index"]) {
+body[data-slug="index"] {
   .page > #quartz-body {
     // Center the content more on index page
     .center {

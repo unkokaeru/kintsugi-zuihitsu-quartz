@@ -2,24 +2,36 @@ button.print-button {
   background: none;
   border: none;
   cursor: pointer;
-  padding: 0.5rem;
+  padding: 0;
+  position: relative;
   color: var(--darkgray);
   transition: color 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  text-align: inherit;
+  flex-shrink: 0;
 
   &:hover {
     color: var(--secondary);
   }
 
   svg {
-    width: 18px;
-    height: 18px;
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    top: calc(50% - 10px);
+    left: 0;
   }
 }
 
 @media print {
+  // Force light mode for printing
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
   // Hide navigation and interactive elements
   .sidebar,
   header,
@@ -32,7 +44,10 @@ button.print-button {
   .search,
   .print-button,
   .toc,
-  .skip-to-content {
+  .skip-to-content,
+  .progress-bar,
+  .keyboard-help-modal,
+  .reader-settings-panel {
     display: none !important;
   }
 
@@ -40,32 +55,45 @@ button.print-button {
   .page {
     max-width: 100%;
     margin: 0;
+    background: white !important;
     
     > #quartz-body {
       display: block;
       padding: 0;
+      background: white !important;
       
       .center {
         max-width: 100%;
         margin: 0;
+        background: white !important;
         
         article {
           max-width: 100%;
+          background: white !important;
+          color: black !important;
         }
       }
     }
   }
 
-  // Typography adjustments for print
+  // Force light backgrounds and dark text
   body {
     font-family: Georgia, "Times New Roman", serif;
     font-size: 12pt;
     line-height: 1.6;
-    color: #000;
-    background: #fff;
+    color: black !important;
+    background: white !important;
   }
 
-  h1 {
+  // Reset all text colors to black for printing
+  p, ul, ol, li, td, th, span, div, blockquote, code {
+    color: black !important;
+    background: transparent !important;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    color: black !important;
+    background: transparent !important;
     font-size: 20pt;
     page-break-after: avoid;
   }
@@ -80,9 +108,7 @@ button.print-button {
     page-break-after: avoid;
   }
 
-  h4,
-  h5,
-  h6 {
+  h4, h5, h6 {
     font-size: 12pt;
     page-break-after: avoid;
   }
@@ -100,11 +126,16 @@ button.print-button {
   a[href^="http"]::after {
     content: " (" attr(href) ")";
     font-size: 90%;
-    color: #666;
+    color: #666 !important;
   }
 
   a.internal::after {
     content: "";
+  }
+
+  a {
+    color: black !important;
+    text-decoration: underline;
   }
 
   // Ensure images fit on page
@@ -117,6 +148,8 @@ button.print-button {
   pre,
   code {
     border: 1px solid #ccc;
+    background: #f5f5f5 !important;
+    color: black !important;
     font-family: "Courier New", Courier, monospace;
     font-size: 10pt;
   }
@@ -124,6 +157,7 @@ button.print-button {
   pre {
     white-space: pre-wrap;
     word-wrap: break-word;
+    padding: 0.5rem;
   }
 
   // Tables
