@@ -1,0 +1,50 @@
+# Mth3004 Lecture 3
+
+- Personalised learning, repetition/**routine** (esp. SEND), learning theories (not styles!), drawing on personal experience/stories when teaching, physical involvement.
+- Zone of proximal development (ZPD) - "too hard" or "too easy".
+- Self-motivation: [Bandura "inner drive to action"](https://neurolaunch.com/bandura-motivation-theory/)…
+	- Mastery experiences,
+	- Vicarious experiences,
+	- Social persuasion,
+	- Emotional/physiological states.
+	- HOWEVER, criticised by more social experiences - individualistic versus collectivist society.
+		- **Preference versus motivation**?
+- Online/virtual practical work reduces barrier to entry for experience; reduces risk to students whilst maintaining experience vicariously.
+- What is a teacher and what makes them stand out?
+	- Patient/understanding - following along learning without giving up
+		- **Empathetic - can't fill knowledge gaps without knowing the knowledge gaps** <- important! Can't frame answers without knowing what knowledge you can frame them with.
+	- scaffolding theory
+	- feedback
+	- educate students
+	- safeguarding
+	- Engaging - link to situational interest etc.
+	- resilience
+	- understanding
+	- Creativity - new pedagogical techniques:
+		- Constructivism
+		- Inquiry-based learning
+		- Peer teaching
+		- Direct instruction
+		- Discussion-based learning
+		- Hand-on learning
+		- Expeditionary learning,
+		- Active learning
+	- **Adaptability** versus differentiation - not having different materials for different groups, but improvising on the go
+	- Motivating - creating inner drive by inciting passion/goals, situational/personal interest building, financial incentive, social consequence; maybe not developing an actual inner drive, but maintaining the interest during lesson (etc.)
+	- National curriculum 1988 - pre and after? Regulations on what to teach?
+	- Active listening - patience to answer all questions, even if seemingly not useful
+	- accountable
+	- administrative
+- What is pedagogy?
+	- "the science behind the teaching" / "the theory and practice of teaching" / "the methods of teaching and learning" - teaching another versus teaching yourself? (research and draw onto personal experience!)
+	- Approaches:
+		- Whole-class teaching
+		- Group work
+		- Guided learning
+		- Practical work
+		- **Questioning** <- this one :)
+			- Develop higher order thinking and metacognition - good use of dialogue and questioning in order to do so.
+			- Counter-argument - pressure to constantly stay active rather than building up with scaffolding. Don't want to detract learning with your own pace; adding in your own breaks (Martin on chair!).
+			- Breaks to ask/develop questions and process information?
+		- Demonstrations
+		- Modelling
