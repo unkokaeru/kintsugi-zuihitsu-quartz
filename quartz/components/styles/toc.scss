@@ -52,9 +52,19 @@ ul.toc-content.overflow {
     opacity: 0.35;
     transition:
       0.5s ease opacity,
-      0.3s ease color;
+      0.3s ease color,
+      0.3s ease border-left-color,
+      0.3s ease transform;
+    padding-left: 0.5rem;
+    border-left: 2px solid transparent;
+    display: block;
+    
     &.in-view {
       opacity: 0.75;
+      border-left-color: var(--secondary);
+      color: var(--secondary);
+      font-weight: 600;
+      transform: translateX(2px);
     }
   }
 

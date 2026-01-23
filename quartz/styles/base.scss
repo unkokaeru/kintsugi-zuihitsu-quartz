@@ -83,6 +83,11 @@ a {
     color: var(--tertiary);
   }
 
+  &:focus {
+    outline: 2px solid var(--secondary);
+    outline-offset: 2px;
+  }
+
   &.internal {
     text-decoration: none;
     background-color: var(--highlight);
@@ -630,4 +635,30 @@ iframe.pdf {
   background: var(--secondary);
   transition: width 0.2s ease;
   z-index: 9999;
+}
+
+// Focus styles for interactive elements
+button,
+input[type="checkbox"],
+select {
+  &:focus {
+    outline: 2px solid var(--secondary);
+    outline-offset: 2px;
+  }
+}
+
+// Reduced motion support
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  html {
+    scroll-behavior: auto;
+  }
 }

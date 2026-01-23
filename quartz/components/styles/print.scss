@@ -1,0 +1,147 @@
+button.print-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  color: var(--darkgray);
+  transition: color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    color: var(--secondary);
+  }
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+@media print {
+  // Hide navigation and interactive elements
+  .sidebar,
+  header,
+  footer,
+  .backlinks,
+  .graph,
+  .explorer,
+  .darkmode,
+  .readermode,
+  .search,
+  .print-button,
+  .toc,
+  .skip-to-content {
+    display: none !important;
+  }
+
+  // Adjust page layout for printing
+  .page {
+    max-width: 100%;
+    margin: 0;
+    
+    > #quartz-body {
+      display: block;
+      padding: 0;
+      
+      .center {
+        max-width: 100%;
+        margin: 0;
+        
+        article {
+          max-width: 100%;
+        }
+      }
+    }
+  }
+
+  // Typography adjustments for print
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 12pt;
+    line-height: 1.6;
+    color: #000;
+    background: #fff;
+  }
+
+  h1 {
+    font-size: 20pt;
+    page-break-after: avoid;
+  }
+
+  h2 {
+    font-size: 16pt;
+    page-break-after: avoid;
+  }
+
+  h3 {
+    font-size: 14pt;
+    page-break-after: avoid;
+  }
+
+  h4,
+  h5,
+  h6 {
+    font-size: 12pt;
+    page-break-after: avoid;
+  }
+
+  // Avoid breaking inside code blocks, images, tables
+  pre,
+  blockquote,
+  img,
+  table,
+  figure {
+    page-break-inside: avoid;
+  }
+
+  // Show link URLs in print
+  a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 90%;
+    color: #666;
+  }
+
+  a.internal::after {
+    content: "";
+  }
+
+  // Ensure images fit on page
+  img {
+    max-width: 100%;
+    page-break-inside: avoid;
+  }
+
+  // Code blocks
+  pre,
+  code {
+    border: 1px solid #ccc;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 10pt;
+  }
+
+  pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+
+  // Tables
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  th,
+  td {
+    border: 1px solid #ccc;
+    padding: 8px;
+  }
+
+  // Avoid orphans and widows
+  p {
+    orphans: 3;
+    widows: 3;
+  }
+}
+
