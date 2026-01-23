@@ -21,7 +21,7 @@ $widescreen: "(min-width: #{map.get($breakpoints, widescreen)})";
 
 $pageWidth: #{map.get($breakpoints, mobile)};
 $sidePanelWidth: 320px;
-$sidePanelWidthWide: 380px;
+$sidePanelWidthWide: 450px;
 $topSpacing: 6rem;
 $boldWeight: 700;
 $semiBoldWeight: 600;

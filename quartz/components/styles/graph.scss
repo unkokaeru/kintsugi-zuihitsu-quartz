@@ -1,19 +1,47 @@
 @use "../../styles/variables.scss" as *;
 
 .graph {
+  width: 100%;
+  
   & > h3 {
     font-size: 1rem;
     margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    
+    &::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: var(--lightgray);
+    }
   }
 
   & > .graph-outer {
-    border-radius: 5px;
+    border-radius: 8px;
     border: 1px solid var(--lightgray);
     box-sizing: border-box;
-    height: 250px;
-    margin: 0.5em 0;
+    height: 300px;
+    width: 100%;
+    margin: 0.75em 0;
     position: relative;
     overflow: hidden;
+    background: var(--light);
+    transition: box-shadow 0.2s ease;
+    
+    // Larger graph on wider screens
+    @media all and ($desktop) {
+      height: 320px;
+    }
+    
+    @media all and ($widescreen) {
+      height: 350px;
+    }
+    
+    &:hover {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
 
     & > .global-graph-icon {
       cursor: pointer;
@@ -21,19 +49,22 @@
       border: none;
       color: var(--dark);
       opacity: 0.5;
-      width: 24px;
-      height: 24px;
+      width: 28px;
+      height: 28px;
       position: absolute;
-      padding: 0.2rem;
-      margin: 0.3rem;
+      padding: 0.3rem;
+      margin: 0.4rem;
       top: 0;
       right: 0;
-      border-radius: 4px;
-      background-color: transparent;
-      transition: background-color 0.5s ease;
+      border-radius: 6px;
+      background-color: var(--light);
+      transition: all 0.2s ease;
       cursor: pointer;
+      
       &:hover {
         background-color: var(--lightgray);
+        opacity: 1;
+        transform: scale(1.1);
       }
     }
   }
@@ -45,9 +76,11 @@
     top: 0;
     width: 100vw;
     height: 100%;
-    backdrop-filter: blur(4px);
+    backdrop-filter: blur(6px);
+    background: rgba(0, 0, 0, 0.3);
     display: none;
     overflow: hidden;
+    animation: fadeIn 0.2s ease;
 
     &.active {
       display: inline-block;
@@ -56,18 +89,41 @@
     & > .global-graph-container {
       border: 1px solid var(--lightgray);
       background-color: var(--light);
-      border-radius: 5px;
+      border-radius: 12px;
       box-sizing: border-box;
       position: fixed;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      height: 80vh;
-      width: 80vw;
+      height: 85vh;
+      width: 85vw;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      animation: scaleIn 0.2s ease;
 
       @media all and not ($desktop) {
-        width: 90%;
+        width: 95%;
+        height: 80vh;
       }
     }
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
   }
 }
