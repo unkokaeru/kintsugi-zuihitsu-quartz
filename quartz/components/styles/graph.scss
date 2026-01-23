@@ -30,6 +30,11 @@
     background: var(--light);
     transition: box-shadow 0.2s ease;
     
+    // Smaller on mobile for better UX
+    @media all and ($mobile) {
+      height: 220px;
+    }
+    
     // Larger graph on wider screens
     @media all and ($desktop) {
       height: 320px;
@@ -60,6 +65,14 @@
       background-color: var(--light);
       transition: all 0.2s ease;
       cursor: pointer;
+      
+      // Bigger touch target on mobile
+      @media all and ($mobile) {
+        width: 36px;
+        height: 36px;
+        padding: 0.4rem;
+        opacity: 0.7;
+      }
       
       &:hover {
         background-color: var(--lightgray);

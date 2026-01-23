@@ -142,6 +142,12 @@ body[data-slug="index"] {
           box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
           margin: 2rem 0 3rem 0;
           animation: fadeInScale 0.8s ease-out;
+          
+          @media all and (max-width: 800px) {
+            border-radius: 8px;
+            margin: 1rem 0 2rem 0;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+          }
         }
         
         // Style the main h1 ("Kintsugi Zuihitsu")
@@ -155,6 +161,11 @@ body[data-slug="index"] {
           background-clip: text;
           text-align: center;
           padding-left: 0;
+          
+          @media all and (max-width: 800px) {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+          }
         }
         
         // Style the intro paragraph
@@ -164,6 +175,12 @@ body[data-slug="index"] {
           text-align: center;
           padding: 0 2rem;
           color: var(--darkgray);
+          
+          @media all and (max-width: 800px) {
+            font-size: 1rem;
+            line-height: 1.7;
+            padding: 0 0.5rem;
+          }
         }
         
         // Style the second paragraph (structure description)
@@ -173,6 +190,12 @@ body[data-slug="index"] {
           text-align: center;
           padding: 0 1rem;
           margin-bottom: 2rem;
+          
+          @media all and (max-width: 800px) {
+            font-size: 0.95rem;
+            padding: 0 0.5rem;
+            margin-bottom: 1.5rem;
+          }
         }
         
         // To-Do section styling
@@ -181,6 +204,11 @@ body[data-slug="index"] {
           text-align: center;
           color: var(--secondary);
           font-size: 1.8rem;
+          
+          @media all and (max-width: 800px) {
+            margin-top: 2rem;
+            font-size: 1.4rem;
+          }
         }
       }
     }
