@@ -2,21 +2,29 @@ let isReaderMode = false
 
 // Typography settings
 interface ReaderSettings {
-  fontSize: "small" | "medium" | "large"
-  lineWidth: "narrow" | "medium" | "wide"
+  fontSize: number // 0.8 to 1.4 rem
+  lineWidth: number // 50 to 100 (percentage of available width)
   background: "default" | "sepia" | "warm"
 }
 
 const defaultSettings: ReaderSettings = {
-  fontSize: "medium",
-  lineWidth: "medium",
+  fontSize: 1.0,
+  lineWidth: 60, // 60% of available width as default
   background: "default",
 }
 
 function loadSettings(): ReaderSettings {
   try {
     const saved = localStorage.getItem("reader-settings")
-    return saved ? { ...defaultSettings, ...JSON.parse(saved) } : defaultSettings
+    if (saved) {
+      const parsed = JSON.parse(saved)
+      // Migrate old pixel-based values to percentage
+      if (parsed.lineWidth > 100) {
+        parsed.lineWidth = 60 // Reset to default percentage
+      }
+      return { ...defaultSettings, ...parsed }
+    }
+    return defaultSettings
   } catch {
     return defaultSettings
   }
@@ -32,8 +40,8 @@ function saveSettings(settings: ReaderSettings) {
 
 function applySettings(settings: ReaderSettings) {
   const root = document.documentElement
-  root.setAttribute("reader-font-size", settings.fontSize)
-  root.setAttribute("reader-line-width", settings.lineWidth)
+  root.style.setProperty("--reader-font-size", `${settings.fontSize}rem`)
+  root.style.setProperty("--reader-line-width", `${settings.lineWidth}%`)
   root.setAttribute("reader-background", settings.background)
 }
 
@@ -74,29 +82,27 @@ document.addEventListener("nav", () => {
   if (settingsPanel) {
     settingsPanel.style.display = "none"
 
-    // Font size controls
-    const fontSizeButtons = settingsPanel.querySelectorAll("[data-font-size]")
-    fontSizeButtons.forEach((button) => {
-      button.addEventListener("click", () => {
-        const size = button.getAttribute("data-font-size") as ReaderSettings["fontSize"]
-        settings.fontSize = size
+    // Font size slider
+    const fontSizeSlider = settingsPanel.querySelector("[data-setting=\"fontSize\"]") as HTMLInputElement
+    if (fontSizeSlider) {
+      fontSizeSlider.value = String(settings.fontSize)
+      fontSizeSlider.addEventListener("input", () => {
+        settings.fontSize = parseFloat(fontSizeSlider.value)
         applySettings(settings)
         saveSettings(settings)
-        updateActiveButtons()
       })
-    })
+    }
 
-    // Line width controls
-    const lineWidthButtons = settingsPanel.querySelectorAll("[data-line-width]")
-    lineWidthButtons.forEach((button) => {
-      button.addEventListener("click", () => {
-        const width = button.getAttribute("data-line-width") as ReaderSettings["lineWidth"]
-        settings.lineWidth = width
+    // Line width slider
+    const lineWidthSlider = settingsPanel.querySelector("[data-setting=\"lineWidth\"]") as HTMLInputElement
+    if (lineWidthSlider) {
+      lineWidthSlider.value = String(settings.lineWidth)
+      lineWidthSlider.addEventListener("input", () => {
+        settings.lineWidth = parseFloat(lineWidthSlider.value)
         applySettings(settings)
         saveSettings(settings)
-        updateActiveButtons()
       })
-    })
+    }
 
     // Background controls
     const backgroundButtons = settingsPanel.querySelectorAll("[data-background]")
@@ -111,12 +117,6 @@ document.addEventListener("nav", () => {
     })
 
     function updateActiveButtons() {
-      fontSizeButtons.forEach((btn) => {
-        btn.classList.toggle("active", btn.getAttribute("data-font-size") === settings.fontSize)
-      })
-      lineWidthButtons.forEach((btn) => {
-        btn.classList.toggle("active", btn.getAttribute("data-line-width") === settings.lineWidth)
-      })
       backgroundButtons.forEach((btn) => {
         btn.classList.toggle(
           "active",

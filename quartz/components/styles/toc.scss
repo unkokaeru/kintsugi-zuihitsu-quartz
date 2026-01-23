@@ -4,6 +4,7 @@
   display: flex;
   flex-direction: column;
   overflow-y: hidden;
+  overflow-x: hidden;
   min-height: 1.4rem;
   flex: 0 0.5 auto;
   &:has(button.toc-header.collapsed) {
@@ -45,28 +46,35 @@ ul.toc-content.overflow {
   padding: 0;
   max-height: calc(100% - 2rem);
   overscroll-behavior: contain;
-  list-style: none;
+  overflow-x: hidden;
+  overflow-y: auto;
 
-  & > li > a {
-    color: var(--dark);
-    opacity: 0.35;
-    transition:
-      0.5s ease opacity,
-      0.3s ease color,
-      0.3s ease border-left-color,
-      0.3s ease transform;
-    padding-left: 0.5rem;
-    border-left: 2px solid transparent;
-    display: block;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
+  & > li {
+    overflow: hidden;
     
-    &.in-view {
-      opacity: 0.75;
-      border-left-color: var(--secondary);
-      color: var(--secondary);
-      font-weight: 600;
-      transform: translateX(2px);
+    & > a {
+      color: var(--dark);
+      opacity: 0.35;
+      transition:
+        0.5s ease opacity,
+        0.3s ease color,
+        0.3s ease border-left-color,
+        0.3s ease transform;
+      padding-left: 0.5rem;
+      border-left: 2px solid transparent;
+      display: block;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      white-space: normal;
+      text-overflow: ellipsis;
+      
+      &.in-view {
+        opacity: 0.75;
+        border-left-color: var(--secondary);
+        color: var(--secondary);
+        font-weight: 600;
+        transform: translateX(2px);
+      }
     }
   }
 

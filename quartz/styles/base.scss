@@ -157,8 +157,15 @@ a {
 }
 
 .page {
-  max-width: calc(#{map.get($breakpoints, desktop)} + 300px);
+  max-width: 100%;
   margin: 0 auto;
+  
+  // On very wide screens, use full width
+  @media all and ($widescreen) {
+    max-width: 100%;
+    padding: 0;
+  }
+  
   & article {
     & > h1 {
       font-size: 2rem;
@@ -192,6 +199,16 @@ a {
     column-gap: #{map.get($desktopGrid, columnGap)};
     row-gap: #{map.get($desktopGrid, rowGap)};
     grid-template-areas: #{map.get($desktopGrid, templateAreas)};
+    
+    // Widescreen: sidebars on far edges, content centered
+    @media all and ($widescreen) {
+      grid-template-columns: #{map.get($widescreenGrid, templateColumns)};
+      grid-template-rows: #{map.get($widescreenGrid, templateRows)};
+      column-gap: #{map.get($widescreenGrid, columnGap)};
+      row-gap: #{map.get($widescreenGrid, rowGap)};
+      grid-template-areas: #{map.get($widescreenGrid, templateAreas)};
+      // No max-width - use full screen width
+    }
 
     @media all and ($tablet) {
       grid-template-columns: #{map.get($tabletGrid, templateColumns)};
@@ -223,12 +240,25 @@ a {
       display: flex;
       height: 100vh;
       position: sticky;
+      
+      // Widescreen: wider sidebars with more padding
+      @media all and ($widescreen) {
+        padding: $topSpacing 2.5rem 2rem 2.5rem;
+      }
     }
 
     & .sidebar.left {
       z-index: 1;
       grid-area: grid-sidebar-left;
       flex-direction: column;
+      
+      // Widescreen: align to far left edge
+      @media all and ($widescreen) {
+        align-items: flex-start;
+        padding-left: 2rem;
+        padding-right: 1rem;
+      }
+      
       @media all and ($mobile) {
         gap: 0;
         align-items: center;
@@ -245,6 +275,14 @@ a {
       grid-area: grid-sidebar-right;
       margin-right: 0;
       flex-direction: column;
+      
+      // Widescreen: align to far right edge
+      @media all and ($widescreen) {
+        align-items: flex-start;
+        padding-right: 2rem;
+        padding-left: 1rem;
+      }
+      
       @media all and ($mobile) {
         margin-left: inherit;
         margin-right: inherit;
@@ -280,6 +318,12 @@ a {
 
     & .center > article {
       grid-area: grid-center;
+      
+      // Widescreen: default width, can be expanded by reader mode
+      @media all and ($widescreen) {
+        max-width: var(--article-max-width, 900px);
+        margin: 0 auto;
+      }
     }
 
     & footer {

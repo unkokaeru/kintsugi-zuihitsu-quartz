@@ -5,6 +5,7 @@ import { classNames } from "../util/lang"
 import { i18n } from "../i18n"
 import { JSX } from "preact"
 import style from "./styles/contentMeta.scss"
+import script from "./scripts/indexmeta.inline"
 
 interface ContentMetaOptions {
   /**
@@ -56,6 +57,7 @@ export default ((opts?: Partial<ContentMetaOptions>) => {
   }
 
   ContentMetadata.css = style
+  ContentMetadata.afterDOMLoaded = script
 
   return ContentMetadata
 }) satisfies QuartzComponentConstructor

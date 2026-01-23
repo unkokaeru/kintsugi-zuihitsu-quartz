@@ -115,6 +115,16 @@ h1 {
 
 // Unique index page styling
 body[data-slug="index"] {
+  // Hide the article title (filename) on index page
+  .article-title {
+    display: none;
+  }
+  
+  // Hide content-meta in the page-header (we'll show it inside article)
+  .page-header .content-meta {
+    display: none;
+  }
+  
   .page > #quartz-body {
     // Center the content more on index page
     .center {
@@ -124,6 +134,7 @@ body[data-slug="index"] {
       
       article {
         max-width: 800px;
+        position: relative;
         
         // Hero image styling
         img {
@@ -133,14 +144,17 @@ body[data-slug="index"] {
           animation: fadeInScale 0.8s ease-out;
         }
         
-        // Make the title more prominent
-        h1 {
-          font-size: 2.5rem;
-          margin-bottom: 2rem;
+        // Style the main h1 ("Kintsugi Zuihitsu")
+        > h1:first-of-type {
+          font-size: 3rem;
+          font-weight: 700;
+          margin-bottom: 0.25rem;
           background: linear-gradient(135deg, var(--secondary), var(--tertiary));
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
+          text-align: center;
+          padding-left: 0;
         }
         
         // Style the intro paragraph

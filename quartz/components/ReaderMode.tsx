@@ -34,18 +34,18 @@ const ReaderMode: QuartzComponent = ({ displayClass, cfg }: QuartzComponentProps
         <h4>Reading Settings</h4>
         <div class="settings-group">
           <label>Font Size</label>
-          <div class="button-group">
-            <button data-font-size="small">Small</button>
-            <button data-font-size="medium" class="active">Medium</button>
-            <button data-font-size="large">Large</button>
+          <div class="slider-group">
+            <span class="slider-label">A</span>
+            <input type="range" class="reader-slider" data-setting="fontSize" min="0.8" max="1.4" step="0.05" />
+            <span class="slider-label slider-label-large">A</span>
           </div>
         </div>
         <div class="settings-group">
           <label>Line Width</label>
-          <div class="button-group">
-            <button data-line-width="narrow">Narrow</button>
-            <button data-line-width="medium" class="active">Medium</button>
-            <button data-line-width="wide">Wide</button>
+          <div class="slider-group">
+            <span class="slider-label">↔</span>
+            <input type="range" class="reader-slider" data-setting="lineWidth" min="50" max="100" step="5" />
+            <span class="slider-label">↔↔</span>
           </div>
         </div>
         <div class="settings-group">
