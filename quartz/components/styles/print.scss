@@ -83,6 +83,19 @@ button.print-button {
     line-height: 1.6;
     color: black !important;
     background: white !important;
+    overflow: visible !important;
+  }
+
+  // Hide scrollbars when printing
+  html, body, * {
+    overflow: visible !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+    &::-webkit-scrollbar {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
+    }
   }
 
   // Reset all text colors to black for printing
