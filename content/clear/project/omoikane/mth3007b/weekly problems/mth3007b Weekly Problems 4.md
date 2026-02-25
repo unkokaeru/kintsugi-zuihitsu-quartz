@@ -162,7 +162,7 @@ time_values, solution_values = explicit_euler_system(
 print(f"y(20) = {solution_values[-1, 1]:g}")
 ```
 
-Now let's visualise the chaotic behaviour. First, importing matplotlib:
+Now let's visualise the chaotic behaviour. First, importing `matplotlib`:
 
 ```python runnable
 await micropip.install("matplotlib")

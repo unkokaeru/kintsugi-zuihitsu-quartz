@@ -90,7 +90,7 @@ $$
 C^i = (A^j B^k - A^k B^j)V
 $$
 
-where $(i, j, k)$ is a cyclic permutation of $(1, 2, 3)$.
+Where $(i, j, k)$ is a cyclic permutation of $(1, 2, 3)$.
 
 ---
 
