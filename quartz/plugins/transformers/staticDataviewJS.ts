@@ -3,6 +3,7 @@ import { slugifyFilePath, FilePath } from "../../util/path"
 import fs from "fs"
 import path from "path"
 import { BuildCtx } from "../../util/ctx"
+import ignore, { Ignore } from "ignore"
 
 /**
  * StaticDataviewJS: Replaces specific `dataviewjs` code blocks with statically computed
@@ -35,8 +36,31 @@ export const StaticDataviewJS: QuartzTransformerPlugin = () => {
   }
 }
 
+function buildIgnoreFilter(ctx: BuildCtx): Ignore {
+  const ig = ignore()
+
+  // Load .gitignore from the repository root (parent of content directory)
+  try {
+    const gitignorePath = path.join(ctx.argv.directory, "..", ".gitignore")
+    const gitignoreContent = fs.readFileSync(gitignorePath, "utf-8")
+    ig.add(gitignoreContent)
+  } catch {
+    // No .gitignore found — that's fine
+  }
+
+  // Also honour Quartz's own ignorePatterns from the config
+  if (ctx.cfg.configuration.ignorePatterns.length > 0) {
+    ig.add(ctx.cfg.configuration.ignorePatterns)
+  }
+
+  return ig
+}
+
 function computeUnresolvedLinksTable(ctx: BuildCtx): string {
   const mdFiles = ctx.allFiles.filter((f) => f.endsWith(".md"))
+
+  // Build a gitignore-aware filter so we don't report links to intentionally ignored files
+  const ig = buildIgnoreFilter(ctx)
 
   // Build a set of all slugs for fast exact lookup
   const allSlugsSet = new Set<string>(ctx.allSlugs)
@@ -92,6 +116,12 @@ function computeUnresolvedLinksTable(ctx: BuildCtx): string {
         (filenameToSlugs.get(filenamePart)?.length ?? 0) > 0
 
       if (!exactMatch && !shortestMatch) {
+        // Skip targets that would be gitignored or match Quartz ignorePatterns
+        const targetAsFile = slugified.endsWith(".md") ? slugified : slugified + ".md"
+        if (ig.ignores(targetAsFile) || ig.ignores(slugified)) {
+          continue
+        }
+
         todoItems.push({
           item: `[[${rawTarget}]]`,
           foundIn: `[[${cleanName}]]`,
