@@ -81,6 +81,9 @@ function computeUnresolvedLinksTable(ctx: BuildCtx): string {
     // Skip files in attached/ (matching the original dataviewjs behavior)
     if (filePath.startsWith("attached/")) continue
 
+    // Skip top-level files (no directory component)
+    if (!filePath.includes("/")) continue
+
     let content: string
     try {
       const fullPath = path.join(ctx.argv.directory, filePath)
