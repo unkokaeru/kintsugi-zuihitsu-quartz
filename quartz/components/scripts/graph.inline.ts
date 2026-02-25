@@ -122,6 +122,29 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
     }
   }
 
+  // Add directory-based relationships: link each file to its parent directory's index page
+  const existingLinks = new Set(links.map((l) => `${l.source}|${l.target}`))
+  for (const source of data.keys()) {
+    const lastSlashIndex = source.lastIndexOf("/")
+    let parentSlug: SimpleSlug
+    if (lastSlashIndex !== -1) {
+      parentSlug = source.substring(0, lastSlashIndex) as SimpleSlug
+    } else if (source !== "/") {
+      parentSlug = "/" as SimpleSlug
+    } else {
+      continue
+    }
+
+    if (validLinks.has(parentSlug) && parentSlug !== source) {
+      const linkKey = `${source}|${parentSlug}`
+      const reverseLinkKey = `${parentSlug}|${source}`
+      if (!existingLinks.has(linkKey) && !existingLinks.has(reverseLinkKey)) {
+        links.push({ source: source, target: parentSlug })
+        existingLinks.add(linkKey)
+      }
+    }
+  }
+
   const neighbourhood = new Set<SimpleSlug>()
   const wl: (SimpleSlug | "__SENTINEL")[] = [slug, "__SENTINEL"]
   if (depth >= 0) {
