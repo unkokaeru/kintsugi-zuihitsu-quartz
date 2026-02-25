@@ -238,10 +238,12 @@ export function transformLink(src: FullSlug, target: string, opts: TransformOpti
 
     if (opts.strategy === "shortest") {
       // if the file name is unique, then it's just the filename
+      // use case-insensitive comparison to match Obsidian's behavior
+      const targetCanonicalLower = targetCanonical.toLowerCase()
       const matchingFileNames = opts.allSlugs.filter((slug) => {
         const parts = slug.split("/")
         const fileName = parts.at(-1)
-        return targetCanonical === fileName
+        return targetCanonicalLower === fileName?.toLowerCase()
       })
 
       // only match, just use it
@@ -252,7 +254,11 @@ export function transformLink(src: FullSlug, target: string, opts: TransformOpti
     }
 
     // if it's not unique, then it's the absolute path from the vault root
-    return (joinSegments(pathToRoot(src), canonicalSlug) + folderTail) as RelativeURL
+    // try case-insensitive match to find the correct slug casing
+    const canonicalSlugLower = canonicalSlug.toLowerCase()
+    const exactMatch = opts.allSlugs.find((slug) => slug.toLowerCase() === canonicalSlugLower)
+    const resolvedSlug = exactMatch ?? canonicalSlug
+    return (joinSegments(pathToRoot(src), resolvedSlug) + folderTail) as RelativeURL
   }
 }
 

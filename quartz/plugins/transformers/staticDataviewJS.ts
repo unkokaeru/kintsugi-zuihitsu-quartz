@@ -62,13 +62,13 @@ function computeUnresolvedLinksTable(ctx: BuildCtx): string {
   // Build a gitignore-aware filter so we don't report links to intentionally ignored files
   const ig = buildIgnoreFilter(ctx)
 
-  // Build a set of all slugs for fast exact lookup
-  const allSlugsSet = new Set<string>(ctx.allSlugs)
+  // Build a set of all slugs for fast exact lookup (lowercase for case-insensitive matching)
+  const allSlugsSet = new Set<string>(ctx.allSlugs.map((s) => s.toLowerCase()))
 
-  // Build a map: last path segment → list of full slugs (for "shortest" matching)
+  // Build a map: last path segment (lowercase) → list of full slugs (for "shortest" matching)
   const filenameToSlugs = new Map<string, string[]>()
   for (const slug of ctx.allSlugs) {
-    const lastSegment = slug.split("/").pop() || slug
+    const lastSegment = (slug.split("/").pop() || slug).toLowerCase()
     if (!filenameToSlugs.has(lastSegment)) {
       filenameToSlugs.set(lastSegment, [])
     }
@@ -105,12 +105,12 @@ function computeUnresolvedLinksTable(ctx: BuildCtx): string {
 
       // Slugify the target the same way Quartz resolves links
       const slugified = slugifyFilePath(rawTarget as FilePath)
-      const filenamePart = slugified.split("/").pop() || slugified
+      const filenamePart = (slugified.split("/").pop() || slugified).toLowerCase()
 
       // Check resolution using "shortest" strategy (matching quartz.config.ts):
-      // 1. Exact slug match
-      // 2. Filename-only match against any slug's last segment
-      const exactMatch = allSlugsSet.has(slugified)
+      // 1. Exact slug match (case-insensitive)
+      // 2. Filename-only match against any slug's last segment (case-insensitive)
+      const exactMatch = allSlugsSet.has(slugified.toLowerCase())
       const shortestMatch =
         filenameToSlugs.has(filenamePart) &&
         (filenameToSlugs.get(filenamePart)?.length ?? 0) > 0
